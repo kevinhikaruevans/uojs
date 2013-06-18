@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+  <script src="http://remysharp.com/demo/mousehold.js"></script>
+  <script type="text/javascript" src="constants.js"></script>
+  <script type="text/javascript" src="main.js"></script>
+  <script type="text/javascript">
+    window.onload = function() {
+    
+      var d = document.getElementById('log');
+      var check = document.getElementById('autoscroll');
+      d.onscroll = function(e) { 
+        //console.log(d.scrollTop + ' ' + (d.scrollHeight) + ' ' + d.offsetHeight + ' ' + d.clientHeight);
+        //console.log((d.scrollTop == (d.scrollHeight+ d.offsetHeight)));
+        check.checked = ((d.scrollTop + d.offsetHeight) == d.scrollHeight);
+      }
+      var e = [];
+      // Let's do a little check first
+      if(!window.WebSocket) 
+        e.push('WebSocket');
+      if(!window.CanvasRenderingContext2D)
+        e.push('Canvas');
+      if(e[0]) {
+        alert('Your browser doesn\'t support: ' + e);
+        return;
+      }
+      
+      
+      UO.system.write('UO (version {0}) by K. H. Evans (Tissemand)', UO.system.version);
+      
+      /*
+      var gameWindow = $('#game');
+      
+      gameWindow.halfWidth = gameWindow.width()/2;
+      gameWindow.halfHeight = gameWindow.height()/2;
+      
+      function checkMouse() {
+        if(!UO.game.socket.connected)
+          return;
+        if(!gameWindow.moving)
+          return;
+        var dir, running;
+        var theta = gameWindow.theta;
+        if(theta < 23)
+          dir = UO.game.direction.northeast;
+        else if (theta < 67)
+          dir = UO.game.direction.north;
+        else if (theta < 122)
+          dir = UO.game.direction.northwest;
+        else if (theta < 167)
+          dir = UO.game.direction.west;
+        else if (theta < 212)
+          dir = UO.game.direction.southwest;
+        else if (theta < 257)
+          dir = UO.game.direction.south;
+        else if (theta < 302)
+          dir = UO.game.direction.southeast;
+        else if (theta < 347)
+          dir = UO.game.direction.east;
+        else
+          dir = UO.game.direction.northeast;
+        if(gameWindow.mag >= 90)
+          running = true;
+        else
+          running = false;
+        UO.game.move.go(dir, running);
+        //console.log(gameWindow.mag);
+      }
+      gameWindow.contextmenu(function(e) {
+        e.preventDefault();
+        return false;
+      });
+      gameWindow.mousedown(function(e) {
+        if(e.button == 2) {
+          gameWindow.moving = true;
+          checkMouse();
+          gameWindow.mouseTimer = setInterval(checkMouse, 300);
+        }
+      });
+      $('body').mouseup(function(e) {
+        if(e.button == 2) {
+          clearInterval(gameWindow.mouseTimer);
+          gameWindow.moving = false; // just to be sure
+        }
+      });
+      gameWindow.mousemove(function(e) {
+        var parentOffset = $(this).parent().offset(); 
+        var relX = e.pageX - parentOffset.left;
+        var relY = e.pageY - parentOffset.top;
+        var dX = (relX - gameWindow.halfWidth);
+        var dY = (gameWindow.halfHeight - relY);
+        
+        var theta = Math.atan(dY/dX);
+        if(dX < 0 && dY >= 0)
+          theta += Math.PI;
+        else if (dX < 0 && dY < 0 )
+          theta += Math.PI;
+        else if (dX >= 0 && dY < 0)
+          theta += 2 * Math.PI;
+        theta *= (180/Math.PI);
+        gameWindow.theta = theta;
+        gameWindow.mag = 100 * Math.sqrt( dX * dX + dY * dY) / gameWindow.halfWidth;
+      });
+      */
+      
+      UO.game.start();
+      UO.game.canvas.initializeMouse();
+      UO.game.canvas.initializeKeyboard();
+    };
+  </script>
+	<style>
+  canvas {
+    border: 1px solid #ccc;
+  }
+  #log-container {
+    border: 1px solid #000;
+    padding: 0.5em;
+    font-family: monospace;
+  }
+  #log-container strong {
+    display: block;
+    overflow: auto;
+    border-bottom: 1px solid #666;
+  }
+  #log-container strong label {
+    float: right;
+  }
+	#log { 
+    overflow: auto;
+    height: 300px;
+    width: 100%;
+    display: block;
+  }
+	</style>
+</head>
+<body>
+  <canvas id="game" width="500" height="500"></canvas>
+  <div id="log-container">
+    <strong>Console & Packet Log<label><input type="checkbox" id="autoscroll" checked="true"/>Scroll</label></strong>
+    <div id="log"></div>
+  </div>
+</body>
+</html>
