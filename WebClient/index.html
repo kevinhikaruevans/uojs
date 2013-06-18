@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+<title>beep</title>
+<script src="jquery.min.js"></script>
+<script src="main2.js"></script>
+<script>
+window.onload = function() {
+	var e;
+	if((e = UO.system.checkBrowser()).length) {
+		UO.system.write('cannot start: {0}', e.join(','));
+	}
+	else
+		UO.system.start();
+};
+</script>
+<style>
+body {
+	background-color: #fff;
+	color: #000;
+	margin: 0;
+	padding: 0;
+
+}
+#canvas {
+	float: left;
+	/*border: 1px solid #666;*/
+}
+#log-container {
+	border: 1px solid #000;
+	padding: 0.5em;
+	font-family: monospace;
+    position:absolute;
+    height:auto;
+    bottom:0;
+    top:0;
+    height: auto;
+    width: 400px;
+    right:0;	
+}
+#log-container strong {
+	display: block;
+	overflow: auto;
+	border-bottom: 1px solid #666;
+}
+#log-container strong label {
+	float: right;
+}
+#log { 
+	overflow: auto;
+	height: 90%;
+	display: block;
+}
+</style>
+</head>
+<body>
+	<canvas id="canvas" width="800" height="800"></canvas>
+	<div id="log-container">
+		<input type="button" onclick="UO.system.kill()" value="kill"/><input type="button" onclick="UO.system.start()" value="start"/><input type="button" onclick="UO.net.sendPing()" value="ping"/><br />
+		<strong>Console & Packet Log<label><input type="checkbox" id="autoscroll" checked="true"/>Scroll</label></strong>
+		<div id="log"></div>
+	</div>
+</body>
+</html>
