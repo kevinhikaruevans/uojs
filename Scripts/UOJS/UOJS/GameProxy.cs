@@ -113,6 +113,7 @@ namespace UOJS.Network
 		
 		protected static void LoadFile (string fileName)
 		{
+			Console.WriteLine ("File Load {0}", fileName);
 			if (fileName.StartsWith ("."))
 				return;
 			using (StreamReader reader = new StreamReader(fileName, m_Encoding)) {
@@ -135,7 +136,7 @@ namespace UOJS.Network
 		protected static void Listen ()
 		{
 			m_ListeningSocket = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-			m_ListeningSocket.Bind (new IPEndPoint (IPAddress.Loopback, 2580));
+			m_ListeningSocket.Bind (new IPEndPoint (IPAddress.Loopback, ListeningPort));
 			m_ListeningSocket.LingerState.Enabled = true;
 			m_ListeningSocket.Listen (8);
 			m_AcceptEvent = new ManualResetEvent (false);
@@ -232,7 +233,6 @@ namespace UOJS.Network
 									}
 							}
 						}
-						Console.WriteLine (">>>>>>>>>>>>>>>>> origin {0} host {1}", orgin, host);
 						sendHeaders = string.Format ("HTTP/1.1 200 OK{0}"
 							+ "Content-Type: application/javascript{0}"
 							+ "Access-Control-Allow-Origin: *{0}"
@@ -717,12 +717,11 @@ namespace UOJS.Network
 							int message = int.Parse (query ["i"]), i = 0;
 							Type StringList = m_Ultima.GetType ("Ultima.StringList");
 							System.Collections.Hashtable table = (System.Collections.Hashtable)StringList.GetProperty ("Table").GetValue (StringList.GetProperty ("EnglishStringList", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy).GetValue (null, null), null);
-						
 							if (!table.ContainsKey (message))
 								return m_Encoding.GetBytes ("{\"text\": null}");
 						
 							string entry = (string)table [message];
-							string replace = Regex.Replace (entry, @"~[A-Za-z0-9_]+~", match => query ["" + (i++)]);
+							string replace = Regex.Replace (entry, @"~[A-Za-z0-9_]+~", match => (query.ContainsKey ("" + (++i)) ? query ["" + (i)] : ""));
 					
 							return UTF8Encoding.UTF8.GetBytes ("{\"text\":\"" + replace.Replace ("\"", "\\\"") + "\"}");
 						}
@@ -885,7 +884,7 @@ namespace UOJS.Network
 		{
 			WebSocketClient client = (WebSocketClient)ar.AsyncState;
 			if (client.WebSocket != null && client.WebSocket.Connected) {
-				UOJS.Log ("Client [{0}]: Sent {1} bytes", client.WebSocket.RemoteEndPoint, client.WebSocket != null && client.WebSocket.Connected ? client.WebSocket.EndSend (ar) : 0);
+				//UOJS.Log ("Client [{0}]: Sent {1} bytes", client.WebSocket.RemoteEndPoint, client.WebSocket != null && client.WebSocket.Connected ? client.WebSocket.EndSend (ar) : 0);
 				client.Close ();
 			}
 		}
@@ -894,7 +893,7 @@ namespace UOJS.Network
 			WebSocketClient client = (WebSocketClient)ar.AsyncState;
 			if (client.WebSocket != null && client.WebSocket.Connected) {
 				try {
-					UOJS.Log ("Client [{0}]: Sent {1} bytes", client.WebSocket.RemoteEndPoint, client.WebSocket != null && client.WebSocket.Connected ? client.WebSocket.EndSend (ar) : 0);
+					//UOJS.Log ("Client [{0}]: Sent {1} bytes", client.WebSocket.RemoteEndPoint, client.WebSocket != null && client.WebSocket.Connected ? client.WebSocket.EndSend (ar) : 0);
 				} catch {
 				
 				}

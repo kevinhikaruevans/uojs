@@ -1,4 +1,4 @@
-Number.prototype.toHex = function() {
+  Number.prototype.toHex = function() {
   var x = this.toString(16).toUpperCase();
   return (x.length == 1) ? ('0' + x) : x;
 };
@@ -1390,7 +1390,7 @@ UO.ui = (function() {
     drawAllLabels: function() {
       var labels = UO.game.getAllLabels();
       var self = UO.game.getSelf();
-      if($.isEmptyObject(labels))
+      if($.isEmptyObject(labels) || !self)
         return;
       for(var i in labels) {
         var label = labels[i];
@@ -1434,7 +1434,6 @@ UO.ui = (function() {
         return m_AnimationCache[uid];
       m_AnimationCache[uid] = new Image();
       m_AnimationCache[uid].src = 'http://{0}/getanim?&i={1}&a={2}&d={3}&h={4}'.format(UO.login.forwarder.proxy, id || 1, action, direction, hue);
-      console.log(m_AnimationCache[uid].src);
       m_AnimationCache[uid].onload = function(){this.loaded = true;};
       return m_AnimationCache[uid];
     },
@@ -1445,7 +1444,6 @@ UO.ui = (function() {
 
       m_ImageCache[uid] = new Image();
       m_ImageCache[uid].src = 'http://{0}/getobj?&t={1}&h={2}&i={3}{4}'.format(UO.login.forwarder.proxy, type, hue, id, crop ? ('&c=' + crop) : '');
-      console.log(m_ImageCache[uid].src);
       m_ImageCache[uid].onload = function(){this.loaded = true;};
 
       return m_ImageCache[uid];
@@ -1474,6 +1472,10 @@ UO.ui = (function() {
           c = UO.ui.drawTile(pX, pY, image);
         } else {
           var uid = (item.body << 16) | (4) << 14 | 2 << 2;
+          console.log('uid = ' + uid);
+          //var uid = (item.body << 16) | action << 14 | direction << 2 | hue;
+          //var animid = uid & (~hue);
+
           if(!m_AnimationData[uid])
             continue;
 
