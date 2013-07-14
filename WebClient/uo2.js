@@ -861,7 +861,7 @@ UO.net = (function() {
           hue: packet.getShort(13)
         };
         UO.game.addObject(player);
-        console.log(player);
+        
         UO.system.write('(77) mobile {0} (b: {1}, h: {2}, d: {3}) at ({4}, {5}, {6})', player.serial, player.body, player.hue, player.d, player.x, player.y, player.z);
       },
       // Draw Object
@@ -1074,7 +1074,7 @@ UO.net = (function() {
 
 UO.game = (function(){
   var m_Self = {}, m_Objects = {}, m_ObjectsAtPoint = {}, m_Map = {}, m_StepSequence, m_LastDirection = -1, m_LastMapLoadPoint = {currentX: 0, currentY: 0, lastX: 0, lastY: 0}, m_Labels = {};
-
+  var m_MapIsLoading = false;
   return {
     // must be even
     PlayerRange: 30,
@@ -1267,11 +1267,14 @@ UO.game = (function(){
       return false;
       if(!UO.game.hasLocation())
         return false;
+      if(!m_Map)
+        return false;
       var self = UO.game.getSelf();
       //var halfRange = (UO.game.PlayerRange / 2) | 0;
-
+      if(!self)
+        return false;
       // I guess maybe we can loop through each spot but it seems unneeded
-      return m_Map[self.x][self.y]; 
+      return !!m_Map[self.x|0][self.y|0]; 
     },
     underRoof: function() {
       if(!m_Map)
@@ -1302,16 +1305,24 @@ UO.game = (function(){
      * @return {Boolean} Returns true on success.
      */
     loadMap: function() {
+      UO.system.write('loadMap? MapIsLoading[{0}], HasLocation[{1}], MapLoaded[{2}]', m_MapIsLoading, UO.game.hasLocation(), UO.game.isMapLoaded());
+      if(m_MapIsLoading)
+        return false;
       if(!UO.game.hasLocation())
         return false;
       //TODO: boundcheck
       if(UO.game.isMapLoaded())
         return true;
+      
       var self = UO.game.getSelf();
+      if(!self)
+        return false;
+      m_MapIsLoading = true;
       $.getJSON('http://{0}/getmapinfo?&x={1}&y={2}&r={3}&m=f'.format(UO.login.forwarder.proxy, (self.x - UO.game.PlayerRange/2), (self.y - UO.game.PlayerRange/2), UO.game.PlayerRange),
           function(data) {
             m_Map = data;
             UO.ui.invalidate();
+            m_MapIsLoading = false;
           });
     }
   };
@@ -1532,6 +1543,9 @@ UO.ui = (function() {
      * @return {Number} Returns the count of tiles rendered
      */
     drawIsometricMap: function(renderMap) {
+
+      if(!UO.game.isMapLoaded())
+        UO.game.loadMap();
       var map = UO.game.getMap();
       var self = UO.game.getSelf();
 

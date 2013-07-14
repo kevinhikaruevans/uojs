@@ -117,10 +117,10 @@ namespace UOJS.Network
 			if (fileName.StartsWith ("."))
 				return;
 			using (StreamReader reader = new StreamReader(fileName, m_Encoding)) {
-				if (m_RawFiles.ContainsKey (fileName))
-					m_RawFiles [fileName] = reader.ReadToEnd ();
+				if (m_RawFiles.ContainsKey (fileName.Replace ("\\", "/")))
+					m_RawFiles [fileName.Replace ("\\", "/")] = reader.ReadToEnd ();
 				else
-					m_RawFiles.Add (fileName, reader.ReadToEnd ());
+					m_RawFiles.Add (fileName.Replace ("\\", "/"), reader.ReadToEnd ());
 				reader.Close ();
 			}
 		}
@@ -179,6 +179,14 @@ namespace UOJS.Network
 			fullUri = first [1];
 			shortUri = fullUri.Substring (0, fullUri.IndexOf ('?') == -1 ? fullUri.Length : fullUri.IndexOf ('?'));
 			
+			// For 301: /WebClient -> /WebClient/index.html
+			if (shortUri == "/" + WebDirectory) {
+				sendHeaders = string.Format ("HTTP/1.1 301 Moved Permanently{0}"
+					+ "Location: /{1}/index.html{0}"
+					+ "Content-Type: text/html{0}{0}301 Moved", "\r\n", WebDirectory);
+				return RequestType.WebRequest;
+			}
+			
 			switch (shortUri) {
 				default:
 					{
@@ -202,7 +210,7 @@ namespace UOJS.Network
 						}
 						return RequestType.WebRequest;
 					}
-				
+
 				case "favicon.png":
 				case "favicon.ico":
 					{
@@ -653,7 +661,7 @@ namespace UOJS.Network
 					
 							//Bitmap b = (Bitmap)(Gumps.GetGump (id).Clone ());
 
-							Bitmap b = (Bitmap)Gumps.GetMethod ("GetGump", new []{typeof(Int32)}).Invoke (null, new object[]{id});
+							Bitmap b = (Bitmap)Gumps.GetMethod ("GetGump", new Type[]{typeof(Int32)}).Invoke (null, new object[]{id});
 							//if (hue != null)
 							//	hue.ApplyTo (b, true);
 					
@@ -672,7 +680,7 @@ namespace UOJS.Network
 							
 							string crop = query.ContainsKey ("c") ? query ["c"] : "";
 							Type Art = m_Ultima.GetType ("Ultima.Art");
-							Bitmap b = (Bitmap)(Art.GetMethod (type == 'l' ? "GetLand" : "GetStatic", new []{typeof(Int32)}).Invoke (null, new object[]{id}));
+							Bitmap b = (Bitmap)(Art.GetMethod (type == 'l' ? "GetLand" : "GetStatic", new Type[]{typeof(Int32)}).Invoke (null, new object[]{id}));
 							//Bitmap b = (Bitmap)(type == 'l' ? Art.GetLand (id) : Art.GetStatic (id)); //don't hue the cached, clone it
 							//if (b == null)
 							//	b = Art.GetLand (0);
@@ -721,9 +729,11 @@ namespace UOJS.Network
 								return m_Encoding.GetBytes ("{\"text\": null}");
 						
 							string entry = (string)table [message];
-							string replace = Regex.Replace (entry, @"~[A-Za-z0-9_]+~", match => (query.ContainsKey ("" + (++i)) ? query ["" + (i)] : ""));
+
+							return UTF8Encoding.UTF8.GetBytes (entry);
+							//string replace = Regex.Replace (entry, @"~[A-Za-z0-9_]+~", match => (query.ContainsKey ("" + (++i)) ? query ["" + (i)] : ""));
 					
-							return UTF8Encoding.UTF8.GetBytes ("{\"text\":\"" + replace.Replace ("\"", "\\\"") + "\"}");
+							//return UTF8Encoding.UTF8.GetBytes ("{\"text\":\"" + replace.Replace ("\"", "\\\"") + "\"}");
 						}
 			
 					case "/getaniminfo":
@@ -734,6 +744,7 @@ namespace UOJS.Network
 							int dir = int.Parse (query ["d"]);
 							int hash = (bodyId << 16) | (action << 8) | (dir);
 							byte[] widths = null;
+                            
 							if (m_Widths.ContainsKey (hash))
 								widths = m_Widths [hash];
 							else {
@@ -758,8 +769,11 @@ namespace UOJS.Network
 									}
 								}
 							}
-					
-							return ASCIIEncoding.ASCII.GetBytes ("{\"widths\": [" + string.Join (",", Array.ConvertAll (widths, x => x.ToString ())) + "]}");
+							List<string> tmp = new List<string> ();
+							foreach (byte b in widths)
+								tmp.Add (b.ToString ());
+                            
+							return ASCIIEncoding.ASCII.GetBytes ("{\"widths\": [" + string.Join (",", tmp.ToArray ()) + "]}");
 						}
 			
 					case "/getanim":
@@ -829,7 +843,7 @@ namespace UOJS.Network
 			GameProxy.Send (client, m_Encoding.GetBytes (string.Format (format, o)), RequestType.WebRequest, false);
 		}
 		
-		public static void Send (WebSocketClient client, byte[] data, RequestType type, bool mask = false)
+		public static void Send (WebSocketClient client, byte[] data, RequestType type, bool mask)
 		{
 			// masking isn't needed?
 			int headerLength = 2;
