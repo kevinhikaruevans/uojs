@@ -1,7 +1,12 @@
+Notice
+==========
+
+This repository has been abandoned due to lack of interest and a lack of time (damn work!). Please feel free to fork it or email me if you'd like a few pointers.
+
 Overview
 ==========
 
-uojs is a proof-of-concept piece for a port of Ultima Online for HTML5 web browsers. It utilizes both HTML5's WebSockets and Canvas. It is completely integrated into RunUO and uses reflection to access UltimaSDK.
+uojs is a proof-of-concept piece for a port of Ultima Online for HTML5 web browsers. This project was created for myself to learn more about the cool features of Javascript. It utilizes both HTML5's WebSockets and Canvas. It is completely integrated into RunUO and uses reflection to access UltimaSDK.
 
 Installation
 ==========
