@@ -1,7 +1,9 @@
 Notice
 ==========
 
-This repository has been abandoned due to lack of interest and a lack of time (damn work!). Please feel free to fork it or email me if you'd like a few pointers.
+Hey!
+
+I've restarted this project and made it 62% less shitty! Check it out here: https://github.com/kevinhikaruevans/uojs2
 
 Overview
 ==========
